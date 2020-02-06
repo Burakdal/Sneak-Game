@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sneak Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="canvas">
+
+    </div>
+</body>
+</html>
+
+<script>
+    var canvas=document.getElementById('canvas');
+    function getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+    function Bubble(x=0,y=0,id) {
+        this.x=x;
+        this.oldx=0;
+        this.oldy=0;
+        this.y=y;
+        this.element=null;
+        this.create(id);
+
+    }
+    Bubble.prototype.create=function(id){
+        var element=document.createElement('div');
+        element.setAttribute('class','bubble');
+        element.setAttribute('id','bubble'+id.toString());
+        document.getElementById('canvas').appendChild(element);
+        this.element=element;
+    };
+    Bubble.prototype.setCords=function () {
+        this.element.style.position='absolute';
+        this.element.style.left=this.x+'px';
+        this.element.style.top=this.y+'px';
+    };
+    Bubble.prototype.update=function (x,y) {
+        this.oldx=this.x;
+        this.oldy=this.y;
+        this.x=x;
+        this.y=y;
+        this.setCords();
+    };
+
+
+    function Snake(){
+        this.tail=[new Bubble(canvas.x+10,canvas.y+10,1)];
+        this.x=canvas.x+10;
+        this.y=canvas.y+10;
+        this.total=1;
+        this.limitControl=()=>{
+            return this.x <screen.width-10 && this.x>10 && this.y>10 && this.y < screen.height-10;
+        };
+        this.update =(direction)=>{
+            if(this.limitControl()){
+                if (direction==='ArrowUp'){
+                    this.y-=20;
+                }else if(direction==='ArrowDown'){
+                    this.y+=20
+                }else if (direction === 'ArrowLeft'){
+                    this.x-=20
+                }else if(direction==='ArrowRight'){
+                    this.x+=20
+                }else if(direction==='Enter'){
+                    this.addBubble();
+                }else{
+                    this.x+=20
+                }
+                this.mapToTail();
+            }
+        };
+        this.mapToTail=()=>{
+            for (let i=0;i<this.tail.length;i++){
+                console.log(i);
+                if(i===0){
+                    this.tail[i].update(this.x,this.y);
+                }else{
+                    this.tail[i].update(this.tail[Math.max(i-1,0)].oldx,this.tail[Math.max(i-1,0)].oldy);
+                }
+            }
+        };
+        this.addBubble=function () {
+            let lastBubble=this.tail[this.tail.length-1];
+            this.tail.push(new Bubble(lastBubble.oldx,lastBubble.oldy,this.total+1));
+            this.total+=1;
+        }
+    }
+    var snake=new Snake();
+    var direction;
+    document.addEventListener('keydown',function onEvent(e) {
+        e.preventDefault();
+        direction=e.key;
+    });
+    setInterval(()=>{
+        snake.update(direction);
+        if(direction==='Enter'){
+            direction='ArrowRight';
+        }
+
+    },200)
+
+</script>
