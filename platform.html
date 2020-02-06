@@ -81,7 +81,7 @@
         this.bait=new Bait();
         this.total=1;
         this.limitControl=()=>{
-            return this.x <790 && this.x>10 && this.y>10 && this.y < 390;
+            return this.x <=790 && this.x>=10 && this.y>=10 && this.y <= 390;
         };
         this.eat=()=>{
             if (this.x===this.bait.x && this.y===this.bait.y){

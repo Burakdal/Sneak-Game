@@ -3,6 +3,8 @@
     width: 800px;
     height: 400px;
     position: absolute;
+    top:0px;
+    left: 0px;
 }
 
 .bubble{
