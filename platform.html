@@ -15,8 +15,37 @@
 <script>
     var canvas=document.getElementById('canvas');
     function getRandomArbitrary(min, max) {
-        return Math.random() * (max - min) + min;
+        var nm=Math.round(Math.random() * (max - min) + min);
+        var mode=nm%20;
+        if (nm>20){
+            nm=nm-mode;
+        }else{
+            nm=nm+mode;
+        }
+        return nm;
     }
+
+    function Bait() {
+        this.x=getRandomArbitrary(10,790);
+        this.y=getRandomArbitrary(10,390);
+        this.element=null;
+        this.create();
+        this.setCords();
+    }
+    Bait.prototype.create=function () {
+        var element=document.createElement('div');
+        element.setAttribute('class','bait');
+        document.getElementById('canvas').appendChild(element);
+        this.element=element;
+    };
+    Bait.prototype.setCords=function () {
+        this.element.style.position='absolute';
+        this.element.style.left=this.x+'px';
+        this.element.style.top=this.y+'px';
+    };
+    Bait.prototype.delete=function () {
+        this.element.remove();
+    };
     function Bubble(x=0,y=0,id) {
         this.x=x;
         this.oldx=0;
@@ -45,15 +74,21 @@
         this.y=y;
         this.setCords();
     };
-
-
     function Snake(){
-        this.tail=[new Bubble(canvas.x+10,canvas.y+10,1)];
-        this.x=canvas.x+10;
-        this.y=canvas.y+10;
+        this.tail=[new Bubble(20,20,1)];
+        this.x=20;
+        this.y=20;
+        this.bait=new Bait();
         this.total=1;
         this.limitControl=()=>{
-            return this.x <screen.width-10 && this.x>10 && this.y>10 && this.y < screen.height-10;
+            return this.x <790 && this.x>10 && this.y>10 && this.y < 390;
+        };
+        this.eat=()=>{
+            if (this.x===this.bait.x && this.y===this.bait.y){
+                this.addBubble();
+                this.bait.delete();
+                this.bait=new Bait();
+            }
         };
         this.update =(direction)=>{
             if(this.limitControl()){
@@ -70,12 +105,12 @@
                 }else{
                     this.x+=20
                 }
+                this.eat();
                 this.mapToTail();
             }
         };
         this.mapToTail=()=>{
             for (let i=0;i<this.tail.length;i++){
-                console.log(i);
                 if(i===0){
                     this.tail[i].update(this.x,this.y);
                 }else{
@@ -97,10 +132,6 @@
     });
     setInterval(()=>{
         snake.update(direction);
-        if(direction==='Enter'){
-            direction='ArrowRight';
-        }
-
     },200)
 
 </script>
