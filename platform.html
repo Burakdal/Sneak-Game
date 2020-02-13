@@ -9,6 +9,13 @@
     <div id="canvas">
 
     </div>
+    <div class="dashboard">
+        <div id="score" class="score">
+            <p id="scoreCount" style="color: white;font-size: 30px;font-weight: bold;">0</p>
+        </div>
+
+    </div>
+
 </body>
 </html>
 
@@ -20,9 +27,31 @@
         if (nm>20){
             nm=nm-mode;
         }else{
-            nm=nm+mode;
+            nm=nm+(20-mode);
         }
         return nm;
+    }
+
+    function Game(){
+        this.borderTop=0;
+        this.borderLeft=0;
+        this.width=800;
+        this.height=400;
+        this.score=new Score();
+        this.snake=new Snake();
+        this.direction="ArrowRight";
+
+        this.start=function () {
+            this.snake.score=this.score;
+            setInterval(()=>{
+                this.snake.update(this.direction);
+            },200);
+            this.score.activate();
+        };
+        this.setDirection=function (direction) {
+            this.direction=direction;
+        };
+
     }
 
     function Bait() {
@@ -74,24 +103,71 @@
         this.y=y;
         this.setCords();
     };
+    function Score(){
+        this.top=0;
+        this.left=0;
+        this.count=0;
+        this.right='';
+        this.element=document.getElementById("score");
+        this.activate=function () {
+            setInterval(()=>{
+                console.log(this.element);
+                this.animate();
+                this.mapToElement();
+            },1000)
+        };
+        this.animate=function () {
+            if(this.right!==''){
+                this.right='';
+                this.left=0;
+            }else{
+                this.right=0;
+                this.left='';
+            }
+
+        };
+        this.mapToElement=function () {
+            this.element.style.left=this.left+"px";
+            this.element.style.top=this.top+"px";
+            this.element.style.right=this.right+"px";
+        };
+        this.incrementScore=function () {
+            this.count+=1;
+            document.getElementById("scoreCount").innerText=this.count;
+        };
+    }
+
     function Snake(){
         this.tail=[new Bubble(20,20,1)];
         this.x=20;
         this.y=20;
         this.bait=new Bait();
         this.total=1;
+        this.fail=false;
+        this.score=null;
+        this.setScore=function(score){
+            this.score=score;
+        };
         this.limitControl=()=>{
-            return this.x <=790 && this.x>=10 && this.y>=10 && this.y <= 390;
+            for(let i=0;i<this.tail.length;i++){
+                if (this.x===this.tail[i].x && this.tail[i].y===this.y && this.total>1){
+                    this.fail=true;
+                }
+            }
+            if(!(this.x <=790 && this.x>=10 && this.y>=10 && this.y <= 390)){
+                this.fail=true;
+            }
         };
         this.eat=()=>{
             if (this.x===this.bait.x && this.y===this.bait.y){
                 this.addBubble();
                 this.bait.delete();
                 this.bait=new Bait();
+                this.score.incrementScore();
             }
         };
         this.update =(direction)=>{
-            if(this.limitControl()){
+            if(!this.fail){
                 if (direction==='ArrowUp'){
                     this.y-=20;
                 }else if(direction==='ArrowDown'){
@@ -105,6 +181,7 @@
                 }else{
                     this.x+=20
                 }
+                this.limitControl();
                 this.eat();
                 this.mapToTail();
             }
@@ -124,14 +201,14 @@
             this.total+=1;
         }
     }
-    var snake=new Snake();
+    var game=new Game();
     var direction;
+    game.start();
     document.addEventListener('keydown',function onEvent(e) {
         e.preventDefault();
         direction=e.key;
+        game.setDirection(direction);
     });
-    setInterval(()=>{
-        snake.update(direction);
-    },200)
+
 
 </script>
