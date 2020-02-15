@@ -9,11 +9,9 @@
     <div id="canvas">
 
     </div>
-    <div class="dashboard">
-        <div id="score" class="score">
-            <p id="scoreCount" style="color: white;font-size: 30px;font-weight: bold;">0</p>
-        </div>
 
+    <div id="score" class="score">
+        <p id="scoreCount" style="color: white;font-size: 30px;font-weight: bold;">0</p>
     </div>
 
 </body>
@@ -33,19 +31,30 @@
     }
 
     function Game(){
-        this.borderTop=0;
-        this.borderLeft=0;
+        this.borderTop=canvas.offsetTop;
+        this.borderLeft=canvas.offsetLeft;
         this.width=800;
         this.height=400;
         this.score=new Score();
         this.snake=new Snake();
         this.direction="ArrowRight";
-
         this.start=function () {
             this.snake.score=this.score;
+            this.snake.borderTop=this.borderTop;
+            this.snake.borderLeft=this.borderLeft;
             setInterval(()=>{
+                if (this.score.count!==0 && this.score.count%3===0){
+                    let degree=-180;
+                    if(this.score.count%2===0){
+                        degree=0
+                    }
+                    //canvas.setAttribute('style','transform:rotate(-18deg)');
+                    canvas.style.webkitTransitionDuration="1s";
+                    canvas.style.webkitTransform=`rotate(${degree}deg)`;
+                }
                 this.snake.update(this.direction);
             },200);
+
             this.score.activate();
         };
         this.setDirection=function (direction) {
@@ -69,8 +78,8 @@
     };
     Bait.prototype.setCords=function () {
         this.element.style.position='absolute';
-        this.element.style.left=this.x+'px';
-        this.element.style.top=this.y+'px';
+        this.element.style.left=canvas.style.left+this.x+'px';
+        this.element.style.top=canvas.style.top+this.y+'px';
     };
     Bait.prototype.delete=function () {
         this.element.remove();
@@ -89,6 +98,7 @@
         element.setAttribute('class','bubble');
         element.setAttribute('id','bubble'+id.toString());
         document.getElementById('canvas').appendChild(element);
+        console.log("Bubble",this.x,this.y);
         this.element=element;
     };
     Bubble.prototype.setCords=function () {
@@ -111,7 +121,6 @@
         this.element=document.getElementById("score");
         this.activate=function () {
             setInterval(()=>{
-                console.log(this.element);
                 this.animate();
                 this.mapToElement();
             },1000)
@@ -139,6 +148,8 @@
 
     function Snake(){
         this.tail=[new Bubble(20,20,1)];
+        this.borderTop=null;
+        this.borderLeft=null;
         this.x=20;
         this.y=20;
         this.bait=new Bait();
@@ -152,9 +163,12 @@
             for(let i=0;i<this.tail.length;i++){
                 if (this.x===this.tail[i].x && this.tail[i].y===this.y && this.total>1){
                     this.fail=true;
+
                 }
             }
             if(!(this.x <=790 && this.x>=10 && this.y>=10 && this.y <= 390)){
+                console.log(this.x,this.borderLeft);
+                console.log(this.y,this.borderTop);
                 this.fail=true;
             }
         };
@@ -184,6 +198,10 @@
                 this.limitControl();
                 this.eat();
                 this.mapToTail();
+            }else{
+                canvas.style.border='solid';
+                canvas.style.borderWidth="10px;";
+                canvas.style.borderColor="red";
             }
         };
         this.mapToTail=()=>{
